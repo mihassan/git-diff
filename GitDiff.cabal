@@ -1,0 +1,73 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.35.2.
+--
+-- see: https://github.com/sol/hpack
+
+name:           GitDiff
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/mihassan/GitDiff#readme>
+homepage:       https://github.com/mihassan/GitDiff#readme
+bug-reports:    https://github.com/mihassan/GitDiff/issues
+author:         Md Imrul Hassan
+maintainer:     mihassan@gmail.com
+copyright:      BSD3
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    CHANGELOG.md
+
+source-repository head
+  type: git
+  location: https://github.com/mihassan/GitDiff
+
+library
+  exposed-modules:
+      Lib
+  other-modules:
+      Paths_GitDiff
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      aeson
+    , aeson-pretty
+    , attoparsec
+    , base >=4.7 && <5
+    , text
+  default-language: Haskell2010
+
+executable GitDiff-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_GitDiff
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      GitDiff
+    , attoparsec
+    , base >=4.7 && <5
+    , text
+  default-language: Haskell2010
+
+test-suite GitDiff-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Lib.HelperParserSpec
+      Lib.ParserSpec
+      Paths_GitDiff
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      GitDiff
+    , attoparsec
+    , base >=4.7 && <5
+    , hspec
+    , hspec-attoparsec
+    , text
+  default-language: Haskell2010
