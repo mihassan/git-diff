@@ -34,8 +34,8 @@ library
   build-depends:
       aeson
     , aeson-pretty
-    , attoparsec
     , base >=4.7 && <5
+    , megaparsec
     , text
   default-language: Haskell2010
 
@@ -48,8 +48,8 @@ executable GitDiff-exe
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       GitDiff
-    , attoparsec
     , base >=4.7 && <5
+    , megaparsec
     , text
   default-language: Haskell2010
 
@@ -65,9 +65,9 @@ test-suite GitDiff-test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       GitDiff
-    , attoparsec
     , base >=4.7 && <5
     , hspec
-    , hspec-attoparsec
+    , hspec-megaparsec
+    , megaparsec
     , text
   default-language: Haskell2010

@@ -37,7 +37,7 @@ library:
   source-dirs: src
   dependencies:
   - text
-  - attoparsec
+  - megaparsec
   - aeson
   - aeson-pretty
 
@@ -52,7 +52,7 @@ executables:
     dependencies:
     - GitDiff
     - text
-    - attoparsec
+    - megaparsec
 
 tests:
   GitDiff-test:
@@ -65,6 +65,6 @@ tests:
     dependencies:
     - GitDiff
     - hspec
-    - attoparsec
+    - megaparsec
     - text
-    - hspec-attoparsec
+    - hspec-megaparsec

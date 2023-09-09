@@ -3,17 +3,20 @@
 
 module Lib where
 
-import Control.Applicative
-import Data.Text (Text)
+import Data.Void
+import Data.Text (Text, pack)
 import Data.Text.Lazy (toStrict)
 import Data.Text.Lazy.Builder (toLazyText)
-import Data.Attoparsec.Combinator
-import Data.Attoparsec.Text
+import Text.Megaparsec
+import Text.Megaparsec.Char
+import Text.Megaparsec.Char.Lexer
 import Data.Aeson
 import Data.Aeson.Encode.Pretty
 import GHC.Generics
 
 -- * Type declarations.
+
+type Parser = Parsec Void Text
 
 newtype Diff = Diff [FileDiff] deriving (Show, Eq, Generic)
 
@@ -49,15 +52,15 @@ instance ToJSON LineDiff where
 -- * Parsers.
 
 diffP :: Parser Diff
-diffP = Diff <$> many1 fileDiffP
+diffP = Diff <$> some fileDiffP
 
 fileDiffP :: Parser FileDiff
 fileDiffP
   =   FileDiff
-  <$> (line *> many1 headerP)
+  <$> (line *> some headerP)
   <*> ("--- a/" *> line)
   <*> ("+++ b/" *> line)
-  <*> many1 chunkP
+  <*> some chunkP
 
 headerP :: Parser Text
 headerP = notFollowedBy "--- " *> line
@@ -65,15 +68,15 @@ headerP = notFollowedBy "--- " *> line
 chunkP :: Parser Chunk
 chunkP
   =   Chunk
-  <$> ("@@ " *> lineRangeP <* char ' ')
-  <*> (lineRangeP <* " @@" <* endOfLine)
-  <*> (many1 lineDiffP)
+  <$> ("@@ " *> lineRangeP <* " ")
+  <*> (lineRangeP <* " @@" <* eol)
+  <*> (some lineDiffP)
 
 lineRangeP :: Parser LineRange
 lineRangeP
   =   LineRange
-  <$> (("-" <|> "+") *> integer)
-  <*> (("," *> integer) <|> pure 1)
+  <$> (("-" <|> "+") *> decimal)
+  <*> (("," *> decimal) <|> pure 1)
 
 lineDiffP :: Parser LineDiff
 lineDiffP
@@ -82,7 +85,7 @@ lineDiffP
   <|> (" " *> (ContextLine <$> line))
 
 parseGitDiff :: Text -> Maybe Text
-parseGitDiff t = case parseOnly diffP t of
+parseGitDiff t = case parse diffP "GitDiff" t of
   Left _ -> Nothing
   Right v -> Just . prettyPrint $ toJSON v
   where
@@ -90,18 +93,6 @@ parseGitDiff t = case parseOnly diffP t of
     prettyPrint = toStrict . toLazyText . encodePrettyToTextBuilder' config
 
 -- * Helper parsers.
-
-notFollowedBy :: Show a => Parser a -> Parser ()
--- notFollowedBy p = optional p >>= guard . isNothing
-notFollowedBy p = do
-  m <- optional p
-  case m of
-    Nothing -> pure ()
-    Just c -> fail $ "notFollowedBy " <> show c
-
-integer :: Parser Int
-integer = read <$> many1 digit
-
 line :: Parser Text
-line = takeWhile1 (not . isEndOfLine) <* (endOfLine <|> endOfInput)
+line = pack <$> someTill anySingle ((eol *> pure ()) <|> eof)
 
