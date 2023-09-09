@@ -10,6 +10,44 @@ import Lib
 
 spec :: Spec
 spec = do
+  describe "diffP Parser" $ do
+    it "should parse valid git diff without ending with newline" $ do
+      parse diffP "" "diff\nindex\n--- a/f1\n+++ b/f2\n@@ -1 +2 @@\n-A\n+B"
+        `shouldParse`
+        Diff [FileDiff ["index"] "f1" "f2" [Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"]]]
+
+    it "should parse valid git diff ending with newline" $ do
+      parse diffP "" "diff\nindex\n--- a/f1\n+++ b/f2\n@@ -1 +2 @@\n-A\n+B\n"
+        `shouldParse`
+        Diff [FileDiff ["index"] "f1" "f2" [Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"]]]
+
+    it "should parse valid git diff with multiple files" $ do
+      parse diffP "" "diff\nindex\n--- a/f1\n+++ b/f2\n@@ -1 +2 @@\n-A\n+B\ndiff\nindex\n--- a/f1\n+++ b/f2\n@@ -1 +2 @@\n-A\n+B\n"
+        `shouldParse`
+        Diff [
+          FileDiff ["index"] "f1" "f2" [Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"]],
+          FileDiff ["index"] "f1" "f2" [Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"]]
+        ]
+
+  describe "fileDiffP Parser" $ do
+    it "should pass valid file diff section without ending with newline" $ do
+      parse fileDiffP "" "diff\nindex\n--- a/f1\n+++ b/f2\n@@ -1 +2 @@\n-A\n+B"
+        `shouldParse`
+        FileDiff ["index"] "f1" "f2" [Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"]]
+
+    it "should pass valid file diff section ending with newline" $ do
+      parse fileDiffP "" "diff\nindex\n--- a/f1\n+++ b/f2\n@@ -1 +2 @@\n-A\n+B\n"
+        `shouldParse`
+        FileDiff ["index"] "f1" "f2" [Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"]]
+
+    it "should pass valid file diff section with multiple chunks" $ do
+      parse fileDiffP "" "diff\nindex\n--- a/f1\n+++ b/f2\n@@ -1 +2 @@\n-A\n+B\n@@ -5,2 +5,3 @@\n U\n+C"
+        `shouldParse`
+        FileDiff ["index"] "f1" "f2" [
+          Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"],
+          Chunk (LineRange 5 2) (LineRange 5 3) [ContextLine "U", AddedLine "C"]
+        ]
+
   describe "headerP Parser" $ do
     it "should parse valid header without ending with newline" $ do
       parse headerP "" "index 12..34 56" `shouldParse` "index 12..34 56"
