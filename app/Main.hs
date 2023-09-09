@@ -7,3 +7,4 @@ import Lib
 
 main :: IO ()
 main = T.interact $ either error id . parseGitDiff
+

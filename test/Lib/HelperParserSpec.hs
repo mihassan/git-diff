@@ -3,11 +3,11 @@
 
 module Lib.HelperParserSpec (spec) where
 
-import Text.Megaparsec
-import Text.Megaparsec.Char
+import Lib
 import Test.Hspec
 import Test.Hspec.Megaparsec
-import Lib
+import Text.Megaparsec
+import Text.Megaparsec.Char
 
 spec :: Spec
 spec = do
@@ -21,7 +21,6 @@ spec = do
     it "should succeed on eof" $ do
       parse eol' "" `shouldSucceedOn` ""
 
-
     it "should fail on carriage return character" $ do
       parse eol' "" `shouldFailOn` "\r"
 
@@ -33,7 +32,6 @@ spec = do
 
     it "should fail on space" $ do
       parse eol' "" `shouldFailOn` " "
-
 
   describe "line Parser" $ do
     it "should parse non-empty line ending with newline" $ do
@@ -63,7 +61,6 @@ spec = do
     it "should parse following another parser that consumes everything not ending with newline" $ do
       parse (some letterChar *> line) "" "FirstParser" `shouldParse` ""
 
-
   describe "line1 Parser" $ do
     it "should parse non-empty line ending with newline" $ do
       parse line1 "" "Line\n" `shouldParse` "Line"
@@ -85,7 +82,6 @@ spec = do
 
     it "should parse multiple lines not ending with newline" $ do
       parse (some line1) "" "Line1\nLine2" `shouldParse` ["Line1", "Line2"]
-
 
     it "should fail on empty line not ending with newline" $ do
       parse line1 "" `shouldFailOn` ""
