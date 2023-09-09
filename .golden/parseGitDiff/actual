@@ -1,0 +1,89 @@
+[
+  {
+    "chunks": [
+      {
+        "fromLineRange": {
+          "from": 1,
+          "length": 6
+        },
+        "lineDiffs": [
+          {
+            "ContextLine": "This is a sample file."
+          },
+          {
+            "RemovedLine": "This line is changed."
+          },
+          {
+            "AddedLine": "These lines are part of the original content."
+          },
+          {
+            "ContextLine": "Add a new line here."
+          },
+          {
+            "ContextLine": "Another change in content."
+          },
+          {
+            "RemovedLine": "Additional lines in the middle."
+          },
+          {
+            "AddedLine": "More lines in the original file."
+          },
+          {
+            "ContextLine": "New content at the end of the file."
+          }
+        ],
+        "toLineRange": {
+          "from": 1,
+          "length": 6
+        }
+      }
+    ],
+    "fromFile": "file1.txt",
+    "headers": [
+      "index 168ed52..e41a4f5 100644"
+    ],
+    "toFile": "file1.txt"
+  },
+  {
+    "chunks": [
+      {
+        "fromLineRange": {
+          "from": 1,
+          "length": 1
+        },
+        "lineDiffs": [
+          {
+            "ContextLine": "This is a sample file."
+          },
+          {
+            "RemovedLine": "This line is changed."
+          },
+          {
+            "AddedLine": "These lines are part of the original content."
+          },
+          {
+            "ContextLine": "Add a new line here."
+          },
+          {
+            "ContextLine": "Another change in content."
+          },
+          {
+            "RemovedLine": "Additional lines in the middle."
+          },
+          {
+            "AddedLine": "More lines in the original file."
+          }
+        ],
+        "toLineRange": {
+          "from": 10,
+          "length": 2
+        }
+      }
+    ],
+    "fromFile": "file2.txt",
+    "headers": [
+      "index 112ed52..e21a1f5 199231"
+    ],
+    "toFile": "file2.txt"
+  }
+]

@@ -58,6 +58,7 @@ test-suite GitDiff-test
   main-is: Spec.hs
   other-modules:
       Lib.HelperParserSpec
+      Lib.ParserGoldenSpec
       Lib.ParserSpec
       Paths_GitDiff
   hs-source-dirs:
@@ -67,6 +68,7 @@ test-suite GitDiff-test
       GitDiff
     , base >=4.7 && <5
     , hspec
+    , hspec-golden
     , hspec-megaparsec
     , megaparsec
     , text

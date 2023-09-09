@@ -64,7 +64,8 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - GitDiff
-    - hspec
     - megaparsec
     - text
+    - hspec
     - hspec-megaparsec
+    - hspec-golden
