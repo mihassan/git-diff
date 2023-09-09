@@ -4,6 +4,7 @@
 module Lib where
 
 import Data.Void
+import Data.Functor
 import Data.Text (Text, pack)
 import Data.Text.Lazy (toStrict)
 import Data.Text.Lazy.Builder (toLazyText)
@@ -93,6 +94,9 @@ parseGitDiff t = case parse diffP "GitDiff" t of
     prettyPrint = toStrict . toLazyText . encodePrettyToTextBuilder' config
 
 -- * Helper parsers.
+eol' :: Parser ()
+eol' = eof <|> eol $> ()
+
 line :: Parser Text
-line = pack <$> someTill anySingle ((eol *> pure ()) <|> eof)
+line = pack <$> someTill (noneOf ['\r', '\n']) eol'
 
