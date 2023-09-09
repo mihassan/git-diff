@@ -34,11 +34,26 @@ spec = do
     it "should fail with invalid chunk header" $ do
       parse chunkP "" `shouldFailOn` ("-1,6 +1,6\n Unchanged" :: Text)
 
+    it "should fail with single line range" $ do
+      parse chunkP "" `shouldFailOn` ("@@ -1,6 @@\n Unchanged" :: Text)
+
+    it "should fail with more than two line ranges" $ do
+      parse chunkP "" `shouldFailOn` ("@@ -1,6 +1,6 +1,16 @@\n Unchanged" :: Text)
+
     it "should fail with no chunk header" $ do
      parse chunkP "" `shouldFailOn` ("+Added\n Unchanged" :: Text)
 
     it "should fail with no diff line" $ do
       parse chunkP "" `shouldFailOn` ("@@ -1,6 +1,6 @@" :: Text)
+
+
+  describe "chunkHeaderP Parser" $ do
+    it "should parse valid chunk header" $ do
+      parse chunkHeaderP "" ("@@ -1,6 +1,5 @@\n" :: Text) `shouldParse` [LineRange 1 6, LineRange 1 5]
+
+    it "should fail on invalid chunk header" $ do
+      parse chunkHeaderP "" `shouldFailOn` ("-1,6 +1,5\n" :: Text)
+
 
   describe "lineRangeP Parser" $ do
     it "should parse single line range with minus prefix" $ do

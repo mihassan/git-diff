@@ -10,7 +10,7 @@ import Data.Text.Lazy (toStrict)
 import Data.Text.Lazy.Builder (toLazyText)
 import Text.Megaparsec
 import Text.Megaparsec.Char
-import Text.Megaparsec.Char.Lexer
+import Text.Megaparsec.Char.Lexer (decimal)
 import Data.Aeson
 import Data.Aeson.Encode.Pretty
 import GHC.Generics
@@ -67,11 +67,13 @@ headerP :: Parser Text
 headerP = notFollowedBy "--- " *> line
 
 chunkP :: Parser Chunk
-chunkP
-  =   Chunk
-  <$> ("@@ " *> lineRangeP <* " ")
-  <*> (lineRangeP <* " @@" <* eol)
-  <*> (some lineDiffP)
+chunkP = do
+  [f, t] <- chunkHeaderP
+  ls <- some lineDiffP
+  pure $ Chunk f t ls
+
+chunkHeaderP :: Parser [LineRange]
+chunkHeaderP = "@@" *> space *> lineRangeP `endBy1` space <* "@@" <* eol
 
 lineRangeP :: Parser LineRange
 lineRangeP
