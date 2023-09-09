@@ -10,6 +10,23 @@ import Lib
 
 spec :: Spec
 spec = do
+  describe "headerP Parser" $ do
+    it "should parse valid header without ending with newline" $ do
+      parse headerP "" "index 12..34 56" `shouldParse` "index 12..34 56"
+
+    it "should parse valid header ending with newline" $ do
+      parse headerP "" "index 12..34 56\n" `shouldParse` "index 12..34 56"
+
+
+    it "should fail on empty line" $ do
+      parse headerP "" `shouldFailOn` ""
+
+    it "should fail on newline" $ do
+      parse headerP "" `shouldFailOn` "\n"
+
+    it "should fail on line starting with '--- '" $ do
+      parse headerP "" `shouldFailOn` "--- Text"
+
   describe "chunkP Parser" $ do
     it "should parse valid chunk" $ do
       parse chunkP "" "@@ -1,6 +1,6 @@\n Unchanged\n+Added\n-Removed"
