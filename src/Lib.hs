@@ -58,13 +58,13 @@ diffP = Diff <$> some fileDiffP
 fileDiffP :: Parser FileDiff
 fileDiffP
   =   FileDiff
-  <$> (line *> some headerP)
-  <*> ("--- a/" *> line)
-  <*> ("+++ b/" *> line)
+  <$> (line1 *> some headerP)
+  <*> ("--- a/" *> line1)
+  <*> ("+++ b/" *> line1)
   <*> some chunkP
 
 headerP :: Parser Text
-headerP = notFollowedBy "--- " *> line
+headerP = notFollowedBy "--- " *> line1
 
 chunkP :: Parser Chunk
 chunkP = do
@@ -87,10 +87,10 @@ lineDiffP
   <|> ("-" *> (RemovedLine <$> line))
   <|> (" " *> (ContextLine <$> line))
 
-parseGitDiff :: Text -> Maybe Text
+parseGitDiff :: Text -> Either String Text
 parseGitDiff t = case parse diffP "GitDiff" t of
-  Left _ -> Nothing
-  Right v -> Just . prettyPrint $ toJSON v
+  Left e -> Left $ errorBundlePretty e
+  Right v -> Right . prettyPrint $ toJSON v
   where
     config = defConfig { confIndent = Spaces 2, confTrailingNewline = True }
     prettyPrint = toStrict . toLazyText . encodePrettyToTextBuilder' config
@@ -101,7 +101,12 @@ eol' :: Parser ()
 eol' = eof <|> eol $> ()
 
 -- | Parse rest of the line. It consumes new line character but does not include in the returned value.
--- Fails on empty line.
+-- Return empty on empty line.
 line :: Parser Text
-line = pack <$> someTill (noneOf ['\r', '\n']) eol'
+line = pack <$> manyTill (noneOf ['\r', '\n']) eol'
+
+-- | Parse rest of the line. It consumes new line character but does not include in the returned value.
+-- Fails on empty line.
+line1 :: Parser Text
+line1 = pack <$> someTill (noneOf ['\r', '\n']) eol'
 
