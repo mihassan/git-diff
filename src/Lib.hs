@@ -94,9 +94,12 @@ parseGitDiff t = case parse diffP "GitDiff" t of
     prettyPrint = toStrict . toLazyText . encodePrettyToTextBuilder' config
 
 -- * Helper parsers.
+-- | Parse end of line or end of file.
 eol' :: Parser ()
 eol' = eof <|> eol $> ()
 
+-- | Parse rest of the line. It consumes new line character but does not include in the returned value.
+-- Fails on empty line.
 line :: Parser Text
 line = pack <$> someTill (noneOf ['\r', '\n']) eol'
 
