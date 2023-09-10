@@ -3,50 +3,47 @@
 
 module Lib.ParserSpec (spec) where
 
-import Text.Megaparsec
+import Lib
 import Test.Hspec
 import Test.Hspec.Megaparsec
-import Lib
+import Text.Megaparsec
 
 spec :: Spec
 spec = do
   describe "diffP Parser" $ do
     it "should parse valid git diff without ending with newline" $ do
       parse diffP "" "diff\nindex\n--- a/f1\n+++ b/f2\n@@ -1 +2 @@\n-A\n+B"
-        `shouldParse`
-        Diff [FileDiff ["index"] "f1" "f2" [Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"]]]
+        `shouldParse` Diff [FileDiff ["index"] "f1" "f2" [Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"]]]
 
     it "should parse valid git diff ending with newline" $ do
       parse diffP "" "diff\nindex\n--- a/f1\n+++ b/f2\n@@ -1 +2 @@\n-A\n+B\n"
-        `shouldParse`
-        Diff [FileDiff ["index"] "f1" "f2" [Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"]]]
+        `shouldParse` Diff [FileDiff ["index"] "f1" "f2" [Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"]]]
 
     it "should parse valid git diff with multiple files" $ do
       parse diffP "" "diff\nindex\n--- a/f1\n+++ b/f2\n@@ -1 +2 @@\n-A\n+B\ndiff\nindex\n--- a/f1\n+++ b/f2\n@@ -1 +2 @@\n-A\n+B\n"
-        `shouldParse`
-        Diff [
-          FileDiff ["index"] "f1" "f2" [Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"]],
-          FileDiff ["index"] "f1" "f2" [Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"]]
-        ]
+        `shouldParse` Diff
+          [ FileDiff ["index"] "f1" "f2" [Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"]],
+            FileDiff ["index"] "f1" "f2" [Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"]]
+          ]
 
   describe "fileDiffP Parser" $ do
     it "should pass valid file diff section without ending with newline" $ do
       parse fileDiffP "" "diff\nindex\n--- a/f1\n+++ b/f2\n@@ -1 +2 @@\n-A\n+B"
-        `shouldParse`
-        FileDiff ["index"] "f1" "f2" [Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"]]
+        `shouldParse` FileDiff ["index"] "f1" "f2" [Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"]]
 
     it "should pass valid file diff section ending with newline" $ do
       parse fileDiffP "" "diff\nindex\n--- a/f1\n+++ b/f2\n@@ -1 +2 @@\n-A\n+B\n"
-        `shouldParse`
-        FileDiff ["index"] "f1" "f2" [Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"]]
+        `shouldParse` FileDiff ["index"] "f1" "f2" [Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"]]
 
     it "should pass valid file diff section with multiple chunks" $ do
       parse fileDiffP "" "diff\nindex\n--- a/f1\n+++ b/f2\n@@ -1 +2 @@\n-A\n+B\n@@ -5,2 +5,3 @@\n U\n+C"
-        `shouldParse`
-        FileDiff ["index"] "f1" "f2" [
-          Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"],
-          Chunk (LineRange 5 2) (LineRange 5 3) [ContextLine "U", AddedLine "C"]
-        ]
+        `shouldParse` FileDiff
+          ["index"]
+          "f1"
+          "f2"
+          [ Chunk (LineRange 1 1) (LineRange 2 1) [RemovedLine "A", AddedLine "B"],
+            Chunk (LineRange 5 2) (LineRange 5 3) [ContextLine "U", AddedLine "C"]
+          ]
 
   describe "headerP Parser" $ do
     it "should parse valid header without ending with newline" $ do
@@ -54,7 +51,6 @@ spec = do
 
     it "should parse valid header ending with newline" $ do
       parse headerP "" "index 12..34 56\n" `shouldParse` "index 12..34 56"
-
 
     it "should fail on empty line" $ do
       parse headerP "" `shouldFailOn` ""
@@ -68,18 +64,15 @@ spec = do
   describe "chunkP Parser" $ do
     it "should parse valid chunk" $ do
       parse chunkP "" "@@ -1,6 +1,6 @@\n Unchanged\n+Added\n-Removed"
-        `shouldParse`
-          Chunk (LineRange 1 6) (LineRange 1 6) [ContextLine "Unchanged", AddedLine "Added", RemovedLine "Removed"]
+        `shouldParse` Chunk (LineRange 1 6) (LineRange 1 6) [ContextLine "Unchanged", AddedLine "Added", RemovedLine "Removed"]
 
     it "should parse valid chunk with newline" $ do
       parse chunkP "" "@@ -1,6 +1,6 @@\n Unchanged\n+Added\n-Removed\n"
-        `shouldParse`
-          Chunk (LineRange 1 6) (LineRange 1 6) [ContextLine "Unchanged", AddedLine "Added", RemovedLine "Removed"]
+        `shouldParse` Chunk (LineRange 1 6) (LineRange 1 6) [ContextLine "Unchanged", AddedLine "Added", RemovedLine "Removed"]
 
     it "should parse valid chunk with more non-chunk lines" $ do
       parse chunkP "" "@@ -1,6 +1,6 @@\n Unchanged\n+Added\n-Removed\nend of chunk\n"
-        `shouldParse`
-          Chunk (LineRange 1 6) (LineRange 1 6) [ContextLine "Unchanged", AddedLine "Added", RemovedLine "Removed"]
+        `shouldParse` Chunk (LineRange 1 6) (LineRange 1 6) [ContextLine "Unchanged", AddedLine "Added", RemovedLine "Removed"]
 
     it "should fail with empty input" $ do
       parse chunkP "" `shouldFailOn` ""
@@ -94,11 +87,10 @@ spec = do
       parse chunkP "" `shouldFailOn` "@@ -1,6 +1,6 +1,16 @@\n Unchanged"
 
     it "should fail with no chunk header" $ do
-     parse chunkP "" `shouldFailOn` "+Added\n Unchanged"
+      parse chunkP "" `shouldFailOn` "+Added\n Unchanged"
 
     it "should fail with no diff line" $ do
       parse chunkP "" `shouldFailOn` "@@ -1,6 +1,6 @@"
-
 
   describe "chunkHeaderP Parser" $ do
     it "should parse valid chunk header" $ do
@@ -106,7 +98,6 @@ spec = do
 
     it "should fail on invalid chunk header" $ do
       parse chunkHeaderP "" `shouldFailOn` "-1,6 +1,5\n"
-
 
   describe "lineRangeP Parser" $ do
     it "should parse single line range with minus prefix" $ do
@@ -120,7 +111,6 @@ spec = do
 
     it "should parse multi line range with plus prefix" $ do
       parse lineRangeP "" "+15,5" `shouldParse` LineRange 15 5
-
 
     it "should fail without minus or plus prefix" $ do
       parse lineRangeP "" `shouldFailOn` "15,5"
@@ -143,7 +133,6 @@ spec = do
 
     it "should parse context line" $ do
       parse lineDiffP "" " Unchanged Line" `shouldParse` ContextLine "Unchanged Line"
-
 
     it "should fail with line starting with letter" $ do
       parse lineDiffP "" `shouldFailOn` "Invalid Line"
